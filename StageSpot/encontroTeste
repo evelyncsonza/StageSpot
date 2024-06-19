@@ -1,0 +1,240 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Encontro extends Evento {
+
+    public static List<Encontro> listaEncontros = new ArrayList<>();
+    private static Ingresso ingresso;
+
+    public Encontro(String nome, String data, String horaInicio, String horaFim, String descricao, int classificacaoIndicativa, Usuario usuario, Local local, Artista artista, Ingresso ingresso) {
+        super(nome, data, horaInicio, horaFim, "Encontro", descricao, classificacaoIndicativa, usuario, local, artista, ingresso);
+    }
+
+    @Override
+    public void cancelarEvento() {
+    }
+
+    @Override
+    public void alterarData(String novaData) {
+        this.data = novaData;
+    }
+
+    @Override
+    public void alterarHora(String novaHora) {
+        this.horaInicio = novaHora;
+    }
+
+    // Implementação do método calcularDuracao para Show
+    @Override
+    public int calcularDuracao() {
+        return calcularDiferencaHoras(horaInicio, horaFim);
+    }
+
+    // Método para calcular a diferença de horas entre duas strings de hora
+    private int calcularDiferencaHoras(String horaInicio, String horaFim) {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+        try {
+            Date dateInicio = format.parse(horaInicio);
+            Date dateFim = format.parse(horaFim);
+
+            long diferencaMillis = dateFim.getTime() - dateInicio.getTime();
+            int diferencaMinutos = (int) (diferencaMillis / (60 * 1000));
+            return diferencaMinutos / 60; // Retorna a diferença em horas
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // Método estático para cadastrar um encontro
+    public static void cadastrarEvento(Scanner scanner) {
+        boolean continuar = true;
+
+        while (continuar) {
+            Usuario usuario = new Usuario("Nome do Usuário", "email@exemplo.com", "123");
+
+            Artista artista = null;
+            if (!Artista.listaArtistas.isEmpty()) {
+                Artista.listarArtistas();
+                System.out.println("\n1 - Escolher Artista");
+                System.out.println("2 - Cadastrar Novo Artista");
+                int opcaoArtista = scanner.nextInt();
+                scanner.nextLine();
+
+                if (opcaoArtista == 1) {
+                    System.out.print("Digite o número do Artista: ");
+                    int numeroArtista = scanner.nextInt();
+                    scanner.nextLine();
+                    if (numeroArtista > 0 && numeroArtista <= Artista.listaArtistas.size()) {
+                        artista = Artista.listaArtistas.get(numeroArtista - 1);
+                    } else {
+                        System.out.println("Número inválido. Tentando novamente.");
+                        continue;
+                    }
+                } else if (opcaoArtista == 2) {
+                    artista = Artista.cadastrarNovoArtista(scanner);
+                } else {
+                    System.out.println("Opção inválida. Tentando novamente.");
+                    continue;
+                }
+            } else {
+                artista = Artista.cadastrarNovoArtista(scanner);
+            }
+
+            System.out.println("\n-------------------Cadastro de Local-------------------");
+            System.out.print("Nome do Local: ");
+            String nomeLocal = scanner.nextLine();
+            System.out.print("Endereço: ");
+            String enderecoLocal = scanner.nextLine();
+            System.out.print("Cidade: ");
+            String cidadeLocal = scanner.nextLine();
+            System.out.print("Estado: ");
+            String estadoLocal = scanner.nextLine();
+            System.out.print("País: ");
+            String paisLocal = scanner.nextLine();
+            System.out.print("Capacidade: ");
+            int capacidadeLocal = scanner.nextInt();
+            scanner.nextLine();
+
+            System.out.println("Tipo de Local: ");
+            System.out.println("1 - Teatro");
+            System.out.println("2 - Estádio");
+            System.out.println("3 - Shopping");
+            System.out.println("4 - Casa de Show");
+            System.out.println("5 - Parque");
+            System.out.println("6 - Auditório");
+            int tipoLocalOpcao = scanner.nextInt();
+            scanner.nextLine();
+
+            String tipoLocal;
+            switch (tipoLocalOpcao) {
+                case 1:
+                    tipoLocal = "Teatro";
+                    break;
+                case 2:
+                    tipoLocal = "Estádio";
+                    break;
+                case 3:
+                    tipoLocal = "Shopping";
+                    break;
+                case 4:
+                    tipoLocal = "Casa de Show";
+                    break;
+                case 5:
+                    tipoLocal = "Parque";
+                    break;
+                case 6:
+                    tipoLocal = "Auditório";
+                    break;
+                default:
+                    System.out.println("Opção inválida. Definindo como 'Outro'.");
+                    tipoLocal = "Outro";
+            }
+
+            Local local = new Local(nomeLocal, enderecoLocal, cidadeLocal, estadoLocal, paisLocal, capacidadeLocal, tipoLocal);
+
+            System.out.println("\n-------------------Tipo de Encontro-------------------");
+            System.out.println("1 - Encontro Pago");
+            System.out.println("2 - Encontro Gratuito");
+            System.out.print("Escolha o tipo de encontro: ");
+            int tipoEncontro = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer
+
+            if (tipoEncontro == 1) {
+                // Continuar com o cadastro do ingresso
+                System.out.println("\n-------------------Cadastro de Ingresso-------------------");
+                System.out.print("Tipos de Ingresso (ex: meia entrada, inteira...): ");
+                String tipoIngresso = scanner.nextLine();
+                System.out.print("Setores disponíveis (ex: pista, área vip, camarote...): ");
+                String setor = scanner.nextLine();
+                System.out.print("Preços a partir de: ");
+                double preco = scanner.nextDouble();
+                scanner.nextLine(); // Limpar o buffer
+                System.out.print("Site de Compra: ");
+                String siteCompra = scanner.nextLine();
+                System.out.print("Cupom de Desconto: ");
+                String cupomDesconto = scanner.nextLine();
+
+                Ingresso ingresso = new Ingresso(tipoIngresso, setor, preco, siteCompra, cupomDesconto);
+            } else if (tipoEncontro == 2) {
+                // Definir o ingresso como gratuito
+                Ingresso ingresso = new Ingresso("Gratuito", "Gratuito", 0, "Gratuito", "Gratuito");
+            } else {
+                System.out.println("Opção inválida. Tentando novamente.");
+                continue;
+            }
+
+            System.out.println("\n-------------------Cadastro de Encontro-------------------");
+            System.out.print("Nome: ");
+            String nome = scanner.nextLine();
+            System.out.print("Data: ");
+            String data = scanner.nextLine();
+            System.out.print("Hora de Início: ");
+            String horaInicio = scanner.nextLine();
+            System.out.print("Hora de Término: ");
+            String horaFim = scanner.nextLine();
+            System.out.print("Descrição: ");
+            String descricao = scanner.nextLine();
+            System.out.print("Classificação Indicativa: ");
+            int classificacaoIndicativa = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer
+
+            Encontro novoEncontro = new Encontro(nome, data, horaInicio, horaFim, descricao, classificacaoIndicativa, usuario, local, artista, ingresso);
+            listaEncontros.add(novoEncontro);
+
+            System.out.println("\nEncontro cadastrado com sucesso!!");
+
+            int opcao = scanner.nextInt();
+            scanner.nextLine();
+
+            if (opcao == 0) {
+                System.out.println("Encerrando o programa.");
+                continuar = false;
+            } else if (opcao == 1) {
+            } else if (opcao == 2) {
+                continuar = true;
+
+            } else {
+                System.out.println("Opção inválida.");
+            }
+        }
+    }
+
+    public static void listarEncontros() {
+        if (listaEncontros.isEmpty()) {
+            System.out.println("Nenhum encontro cadastrado.");
+        } else {
+            System.out.println("-------------------Lista de Encontros-------------------");
+            for (Encontro encontro : listaEncontros) {
+                System.out.println("Nome: " + encontro.getNome() + ", Data: " + encontro.getData() + ", Hora de Início: " + encontro.getHoraInicio() + ", Hora de Término: " + encontro.getHoraFim()
+                        + ", Artista: " + encontro.getArtista().getNome() + ", Preço do Ingresso a partir de: " + encontro.getIngresso().getPreco()
+                        + ", Local: " + encontro.getLocal().getNome());
+            }
+        }
+    }
+
+    // Sobrescrita do método exibirDetalhes para exibir detalhes específicos do encontro
+    @Override
+    protected void exibirDetalhes() {
+        super.exibirDetalhes();
+        System.out.println("------ Detalhes do Encontro ------");
+        System.out.println("Artista: " + getArtista().getNome());
+
+    }
+
+    public Artista getArtista() {
+        return artista;
+    }
+
+    public Ingresso getIngresso() {
+        return ingresso;
+    }
+
+    public Local getLocal() {
+        return local;
+    }
+}
